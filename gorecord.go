@@ -1,46 +1,47 @@
 package main
 
 import (
-  "flag"
   "fmt"
   "os"
   "github.com/aws/aws-sdk-go/aws/session"
   "github.com/aws/aws-sdk-go/service/route53"
 )
 
-/* Environment variables that the SDK will look for:
+
+/*  Environment variables that this script needs:
+      - HOSTED_ZONE
+      - RECORD_SET
+      - RECORD_VALUE
+    Environment variables that the SDK will look for:
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_SESSION_TOKEN (optional)
 (https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)
-  - AWS_ACCESS_KEY_ID
-  - AWS_SECRET_ACCESS_KEY
-  - AWS_SESSION_TOKEN (optional)
 */
 
-var hosted_zone string    // The hosted zone (e.g. jordankueh.com)
-var record_set string     // The record set (e.g. remoteserver.jordankueh.com)
-var record_value string   // The record value (e.g. 127.0.1.1)
-/*
-  While the record_value variable is specified here, if using build arguments
-  to set these variables, record_value should be left untouched as this data
-  is prone to change, especially on residential connections where the DHCP lease
-  renewal may occur frequently.
-*/
+var hosted_zone string;
+var record_set string;
+var record_value string;
 
 func init() {
-  hosted_zone := flag.String("z", "", "The hosted zone / domain name.")
-  record_set := flag.String("r", "", "The record set / record to update.")
-  record_value := flag.String("a", "", "The new A record value.")
-  flag.Parse()
+  hosted_zone := os.Getenv("HOSTED_ZONE")
+  record_set := os.Getenv("RECORD_SET")
+  record_value := os.Getenv("RECORD_VALUE")
+  if len(hosted_zone) == 0 {
+    fmt.Fprintf(os.Stderr, "[CRITICAL] HOSTED_ZONE not defined.\n")
+    os.Exit(1)
+  }
+  if len(record_set) == 0 {
+    fmt.Fprintf(os.Stderr, "[CRITICAL] RECORD_SET not defined.\n")
+    os.Exit(2)
+  }
+  if len(record_value) == 0 {
+    fmt.Fprintf(os.Stderr, "[CRITICAL] RECORD_VALUE not defined.\n")
+    os.Exit(3)
+  }
 }
 
 func main() {
-  /*  Temporary - Because I haven't actually used these variables anywhere yet,
-      the golang compiler is (rightfully) complaining that I haven't used them
-      yet.
-  */
-
-  hosted_zone_ptr = &hosted_zone
-  record_set_ptr = &record_set
-  record_value_ptr = &record_value
   // Build the session object
   sess, err := session.NewSession()
   if err != nil {
@@ -49,9 +50,42 @@ func main() {
       "An error occurred while trying to create a new AWS session:\n%s\n",
       err.Error(),
     )
-    os.Exit(1)
+    os.Exit(4)
   }
   // Get a Route53 API wrapper from the session
   svc := route53.New(sess)
 
+  // Create the HostedZoneInput struct
+  hosted_zone_input := route53.GetHostedZoneInput{Id: &hosted_zone}
+
+  // Ensure that the hosted zone exists first
+  hosted_zone_output, err := svc.GetHostedZone(&hosted_zone_input)
+  if err != nil {
+    fmt.Fprintf(
+      os.Stderr,
+      "[CRITICAL] Unable to find zone with ID '%s'.\n%v",
+      hosted_zone,
+      err.Error(),
+    )
+    os.Exit(5)
+  }
+
+  // Ensure the record set exists
+  resource_record_set := route53.ResourceRecordSet{
+    Name: &record_set,
+    Type: "A",
+    TTL: 600,
+  }
+  change_action := "create"
+  record_change := route53.Change{
+    Action: &change_action,
+    ResourceRecordSet: &resource_record_set,
+  }
+  change_array := [ &record_change ]
+  change_batch := route53.ChangeBatch{Changes: &change_array }
+  change_set := route53.ChangeResourceRecordSetsInput{
+    ChangeBatch: &change_batch,
+    HostedZoneId: &hosted_zone_output.HostedZone.Id,
+  }
+  change := route53.ChangeResourceRecordSets(&change_set)
 }

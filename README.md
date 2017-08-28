@@ -21,7 +21,11 @@ Next-to-best practice:
 
 * Compile the binary with `go build` (setting GOOS and GOOARCH as necessary),
 and place it in `/usr/local/sbin` (ensuring that it's executable);
-* Create a wrapper script that exports the following environment variables:
+* Create a wrapper script (see gorecord.sh) that exports the following
+environment variables:
+  * `HOSTED_ZONE_ID`
+  * `RECORD_SET`
+  * `RECORD_VALUE`
   * `AWS_ACCESS_KEY_ID`
   * `AWS_SECRET_ACCESS_KEY`
   * `AWS_SESSION_TOKEN` (optional)
