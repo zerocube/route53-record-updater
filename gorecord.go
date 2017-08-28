@@ -24,9 +24,9 @@ var record_set string;
 var record_value string;
 
 func init() {
-  hosted_zone := os.Getenv("HOSTED_ZONE")
-  record_set := os.Getenv("RECORD_SET")
-  record_value := os.Getenv("RECORD_VALUE")
+  hosted_zone = os.Getenv("HOSTED_ZONE")
+  record_set = os.Getenv("RECORD_SET")
+  record_value = os.Getenv("RECORD_VALUE")
   if len(hosted_zone) == 0 {
     fmt.Fprintf(os.Stderr, "[CRITICAL] HOSTED_ZONE not defined.\n")
     os.Exit(1)
@@ -70,22 +70,41 @@ func main() {
     os.Exit(5)
   }
 
-  // Ensure the record set exists
+  // Define the record that we're going to be UPSERTing
+  record_type := "A"
+  record_ttl := int64(600)
   resource_record_set := route53.ResourceRecordSet{
     Name: &record_set,
-    Type: "A",
-    TTL: 600,
+    Type: &record_type,
+    TTL: &record_ttl,
   }
-  change_action := "create"
-  record_change := route53.Change{
+
+  // Define the change struct
+  change_action := "UPSERT"
+  change := route53.Change{
     Action: &change_action,
     ResourceRecordSet: &resource_record_set,
   }
-  change_array := [ &record_change ]
-  change_batch := route53.ChangeBatch{Changes: &change_array }
+  var change_array []*route53.Change
+  change_array = append(change_array, &change)
+  change_batch := route53.ChangeBatch{Changes: change_array }
   change_set := route53.ChangeResourceRecordSetsInput{
     ChangeBatch: &change_batch,
-    HostedZoneId: &hosted_zone_output.HostedZone.Id,
+    HostedZoneId: hosted_zone_output.HostedZone.Id,
   }
-  change := route53.ChangeResourceRecordSets(&change_set)
+  // Make the change
+  change_output, err := svc.ChangeResourceRecordSets(&change_set)
+  if err != nil {
+    fmt.Fprintf(
+      os.Stderr,
+      "[ERROR] An error occurred while trying to update the record set.\n%v\n",
+      err,
+    )
+    os.Exit(6)
+  } else {
+    fmt.Printf(
+      "Change submitted. Current status: %s",
+      change_output.ChangeInfo.Status,
+    )
+  }
 }
