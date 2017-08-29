@@ -4,6 +4,7 @@ import (
   "fmt"
   "os"
   "strconv"
+  "time"
   "github.com/aws/aws-sdk-go/aws"
   "github.com/aws/aws-sdk-go/aws/session"
   "github.com/aws/aws-sdk-go/service/route53"
@@ -25,6 +26,7 @@ var record_set string;
 var record_value string;
 var record_type string;
 var record_ttl int64;
+var change_comment string;
 var verbose bool;
 
 func init() {
@@ -54,6 +56,16 @@ func init() {
       os.Exit(1)
     }
     record_ttl = env_ttl
+  }
+  if len(os.Getenv("CHANGE_COMMENT")) != 0 && len(change_comment) == 0 {
+    change_comment = os.Getenv("CHANGE_COMMENT")
+  } else {
+    change_comment = fmt.Sprintf(
+      "GoRecord change at %s",
+      time.Now().UTC(),
+    )
+    fmt.Println(change_comment)
+    os.Exit(0)
   }
 
   /*  Complain if we still don't have the values we need, or set a sensible
@@ -131,7 +143,10 @@ func main() {
   }
   var change_array []*route53.Change
   change_array = append(change_array, &change)
-  change_batch := route53.ChangeBatch{Changes: change_array }
+  change_batch := route53.ChangeBatch{
+    Changes: change_array
+    Comment: &change_comment
+  }
   change_input := route53.ChangeResourceRecordSetsInput{
     ChangeBatch: &change_batch,
     HostedZoneId: &hosted_zone,
