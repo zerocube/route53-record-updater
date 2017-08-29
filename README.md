@@ -13,6 +13,21 @@ Unless:
 * Under some really strange circumstances, this kind of stunt might just be what
 you need.
 
+## Downloading
+
+### Downloading a precompiled binary
+
+[The GitLab pipelines page](https://gitlab.com/jordankueh/GoRecord/pipelines)
+will allow you to download a pre-built binary for your platform.
+
+### Downloading via the source
+Cloning from the source is also possible, from:
+
+* https://gitlab.com/jordankueh/GoRecord; or
+* https://github.com/jordankueh/GoRecord.
+
+The 'master' branch is the most stable version available.
+
 ## Usage
 
 Best practice:
