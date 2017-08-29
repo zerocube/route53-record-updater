@@ -1,0 +1,87 @@
+image: golang:1.9
+
+variables:
+  IMAGE_URL: "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}"
+
+stages:
+  - test
+  - build
+
+# Basic syntax test
+Syntax Test:
+  stage: test
+  script:
+    - go-wrapper test
+  tags:
+    - docker
+
+# We split up the platform builds into their own separate jobs as it allows us
+# to run them concurrently, and also provide separate artifact .zip files.
+
+# Build the docker image, and push it to the GitLab registry.
+# Try pulling the image first to prevent unnecessary building.
+Docker Build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p "${CI_JOB_TOKEN}" "${CI_REGISTRY}"
+  script:
+    - >
+      if docker pull "${IMAGE_URL}"; then
+        echo "Image already built - skipping.";
+      else
+        docker build -t ${IMAGE_URL} .;
+        docker push "${IMAGE_URL}";
+      fi
+  tags:
+    - docker
+
+# Build for Linux amd64
+Linux amd64 Build:
+  stage: build
+  variables:
+    GOOS: linux
+    GOARCH: amd64
+  script:
+    - go build -o ./gorecord
+  artifacts:
+    paths:
+      - ./gorecord
+  only:
+    - master
+  tags:
+    - docker
+
+# Build for mips64 (e.g. EdgeRouter)
+Linux mips64 Build:
+  stage: build
+  variables:
+    GOOS: linux
+    GOARCH: mips64
+  script:
+    - go build -o ./gorecord
+  artifacts:
+    paths:
+      - ./gorecord
+  only:
+    - master
+  tags:
+    - docker
+
+# Build for MacOS x64
+MacOS amd64 Build:
+  stage: build
+  variables:
+    GOOS: darwin
+    GOARCH: amd64
+  script:
+    - go build -o ./gorecord
+  artifacts:
+    paths:
+      - ./gorecord
+  only:
+    - master
+  tags:
+    - docker
