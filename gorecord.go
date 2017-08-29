@@ -64,8 +64,6 @@ func init() {
       "GoRecord change at %s",
       time.Now().UTC(),
     )
-    fmt.Println(change_comment)
-    os.Exit(0)
   }
 
   /*  Complain if we still don't have the values we need, or set a sensible
@@ -144,8 +142,8 @@ func main() {
   var change_array []*route53.Change
   change_array = append(change_array, &change)
   change_batch := route53.ChangeBatch{
-    Changes: change_array
-    Comment: &change_comment
+    Changes: change_array,
+    Comment: &change_comment,
   }
   change_input := route53.ChangeResourceRecordSetsInput{
     ChangeBatch: &change_batch,
