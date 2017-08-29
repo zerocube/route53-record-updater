@@ -11,7 +11,7 @@ stages:
 Syntax Test:
   stage: test
   script:
-    - go-wrapper test
+    - gofmt -e *.go > /dev/null
   tags:
     - docker
 
