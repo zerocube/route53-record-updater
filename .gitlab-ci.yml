@@ -46,7 +46,6 @@ Linux amd64 Build:
     GOARCH: amd64
   script:
     - go-wrapper download
-    - go-wrapper install
     - go build -o ./gorecord
   artifacts:
     paths:
@@ -64,7 +63,6 @@ Linux mips64 Build:
     GOARCH: mips64
   script:
     - go-wrapper download
-    - go-wrapper install
     - go build -o ./gorecord
   artifacts:
     paths:
@@ -82,7 +80,6 @@ MacOS amd64 Build:
     GOARCH: amd64
   script:
     - go-wrapper download
-    - go-wrapper install
     - go build -o ./gorecord
   artifacts:
     paths:
