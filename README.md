@@ -1,4 +1,6 @@
 # gorecord
+[![pipeline status](https://gitlab.com/jordankueh/GoRecord/badges/master/pipeline.svg)](https://gitlab.com/jordankueh/GoRecord/commits/master)
+
 This kind of script is almost definitely not something you want to run in a
 production environment, as:
 
