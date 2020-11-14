@@ -1,104 +1,73 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/route53"
 )
 
-/*  Environment variables that this script needs:
-      - HOSTED_ZONE
-      - RECORD_SET
-      - RECORD_VALUE
-    Environment variables that the SDK will look for:
+/* Environment variables that the SDK will look for:
       - AWS_ACCESS_KEY_ID
       - AWS_SECRET_ACCESS_KEY
       - AWS_SESSION_TOKEN (optional)
 (https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)
 */
 
-var hosted_zone string
-var record_set string
-var record_value string
-var record_type string
-var record_ttl int64
-var change_comment string
-var verbose bool
+const version = "1.0.0"
 
 func main() {
 	// Build the session object
 	sess, err := session.NewSession()
 	if err != nil {
-		fmt.Fprintf(
-			os.Stderr,
-			"An error occurred while trying to create a new AWS session:\n%s\n",
-			err.Error(),
-		)
-		os.Exit(5)
+		log.Fatalln("An error occurred while trying to create an AWS session:", err)
 	}
 	// Get a Route53 API wrapper from the session
 	svc := route53.New(sess)
 
-	// Create the HostedZoneInput struct
-	hosted_zone_input := route53.GetHostedZoneInput{Id: &hosted_zone}
-
 	// Ensure that the hosted zone exists first
-	_, err = svc.GetHostedZone(&hosted_zone_input)
+	_, err = svc.GetHostedZone(&route53.GetHostedZoneInput{Id: hostedZoneID})
 	if err != nil {
-		fmt.Fprintf(
-			os.Stderr,
-			"[CRITICAL] Unable to find zone with ID '%s'.\n%v\n",
-			hosted_zone,
-			err.Error(),
-		)
-		os.Exit(6)
+		log.Fatalln("Unable to find hosted zone with ID", hostedZoneID)
 	}
 
 	// Define the record that we're going to be UPSERTing
-	resource_record := route53.ResourceRecord{
-		Value: &record_value,
-	}
-	resource_record_set := route53.ResourceRecordSet{
-		Name:            &record_set,
-		Type:            &record_type,
-		TTL:             &record_ttl,
-		ResourceRecords: []*route53.ResourceRecord{&resource_record},
+	resourceRecordSet := route53.ResourceRecordSet{
+		Name: recordSet,
+		Type: aws.String("A"),
+		TTL:  recordTTL,
+		ResourceRecords: []*route53.ResourceRecord{
+			&route53.ResourceRecord{
+				Value: recordValue,
+			},
+		},
 	}
 
 	// Define the Change struct and ChangeBatch
-	change := route53.Change{
-		Action:            aws.String("UPSERT"),
-		ResourceRecordSet: &resource_record_set,
+	changeBatch := &route53.ChangeBatch{
+		Changes: []*route53.Change{
+			{
+				Action:            aws.String("UPSERT"),
+				ResourceRecordSet: &resourceRecordSet,
+			},
+		},
 	}
-	var change_array []*route53.Change
-	change_array = append(change_array, &change)
-	change_batch := route53.ChangeBatch{
-		Changes: change_array,
-		Comment: &change_comment,
+	if *changeComment != "" {
+		changeBatch.Comment = changeComment
 	}
-	change_input := route53.ChangeResourceRecordSetsInput{
-		ChangeBatch:  &change_batch,
-		HostedZoneId: &hosted_zone,
+	changeInput := route53.ChangeResourceRecordSetsInput{
+		ChangeBatch:  changeBatch,
+		HostedZoneId: hostedZoneID,
 	}
 	if verbose {
-		fmt.Printf("ChangeResourceRecordSetsInput: %v\n", change_input)
+		log.Println("ChangeResourceRecordSetsInput", changeInput)
 	}
 	// Make the change
-	change_output, err := svc.ChangeResourceRecordSets(&change_input)
+	changeOutput, err := svc.ChangeResourceRecordSets(&changeInput)
 	if err != nil {
-		fmt.Fprintf(
-			os.Stderr,
-			"[ERROR] An error occurred while trying to update the record set.\n%v\n",
-			err,
-		)
-		os.Exit(7)
+		log.Fatalln("An error occurred while trying to update the record set:", err)
 	} else {
-		fmt.Printf(
-			"Change submitted. Current status: %v\n",
-			change_output.ChangeInfo.Status,
-		)
+		log.Println("Change submitted. Current status:", changeOutput.ChangeInfo.Status)
 	}
 }

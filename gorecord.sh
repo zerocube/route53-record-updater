@@ -14,3 +14,5 @@ RECORD_VALUE="$(curl --interface ${CURL_INTERFACE} https://api.ipify.org)"
 AWS_ACCESS_KEY_ID="AWS_ACCESS_KEY_ID"
 AWS_SECRET_ACCESS_KEY="AWS_SECRET_ACCESS_KEY"
 AWS_SESSION_TOKEN="ThisIsOptional"
+
+/usr/bin/env gorecord -
