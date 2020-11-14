@@ -1,0 +1,24 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build and push to GitHub Packages
+      uses: docker/build-push-action@v1
+      with:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        registry: docker.pkg.github.com
+        repository: zerocube/route53-record-updater/route53-record-updater
+        tag_with_ref: true

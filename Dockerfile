@@ -1,4 +1,4 @@
-FROM golang:1.9
+FROM golang:1.15
 WORKDIR /go/src/app
 RUN go-wrapper download github.com/aws/aws-sdk-go \
   && go-wrapper install github.com/aws/aws-sdk-go

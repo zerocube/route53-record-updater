@@ -1,0 +1,78 @@
+# Creates a GitHub release
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+
+name: Create Release
+
+jobs:
+  build:
+    name: Build the Artefacts
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v2
+        with:
+          go-version: ^1.15
+        id: go
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build project
+        run: auto/build
+      - name: Upload build artefacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: binaries
+          path: build/route53-record-updater*
+  create_release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download compiled binaries
+        uses: actions/download-artifact@v2
+        with:
+          name: binaries
+          path: build/
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Linux amd64 binary
+        id: upload-release-asset-linux-amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/route53-record-updater_linux_amd64
+          asset_name: route53-record-updater_linux_amd64
+          asset_content_type: application/octet-stream
+      - name: Upload Darwin amd64 binary
+        id: upload-release-asset-darwin-amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/route53-record-updater_darwin_amd64
+          asset_name: route53-record-updater_darwin_amd64
+          asset_content_type: application/octet-stream
+      - name: Upload Windows amd64 binary
+        id: upload-release-asset-windows-amd64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: build/route53-record-updater_windows_amd64
+          asset_name: route53-record-updater_windows_amd64
+          asset_content_type: application/octet-stream
