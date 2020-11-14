@@ -29,7 +29,7 @@ func main() {
 	// Ensure that the hosted zone exists first
 	_, err = svc.GetHostedZone(&route53.GetHostedZoneInput{Id: hostedZoneID})
 	if err != nil {
-		log.Fatalln("Unable to find hosted zone with ID", hostedZoneID)
+		log.Fatalln("Unable to find hosted zone with ID", *hostedZoneID)
 	}
 
 	// Define the record that we're going to be UPSERTing
@@ -56,6 +56,7 @@ func main() {
 	if *changeComment != "" {
 		changeBatch.Comment = changeComment
 	}
+
 	changeInput := route53.ChangeResourceRecordSetsInput{
 		ChangeBatch:  changeBatch,
 		HostedZoneId: hostedZoneID,
@@ -68,6 +69,6 @@ func main() {
 	if err != nil {
 		log.Fatalln("An error occurred while trying to update the record set:", err)
 	} else {
-		log.Println("Change submitted. Current status:", changeOutput.ChangeInfo.Status)
+		log.Println("Change submitted. Current status:", *changeOutput.ChangeInfo.Status)
 	}
 }
