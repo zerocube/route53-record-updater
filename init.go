@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
 )
 
 /* The parameters we pull in via flags are:
@@ -31,5 +33,12 @@ func init() {
 
 	flag.BoolVar(&verbose, "verbose", false, "Enables verbose output")
 
+	outputVersion := flag.Bool("version", false, "Outputs version information and exits.")
+
 	flag.Parse()
+
+	if *outputVersion {
+		fmt.Println(version)
+		os.Exit(0)
+	}
 }
