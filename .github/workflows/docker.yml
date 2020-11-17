@@ -31,5 +31,5 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         tags: |
-          ghcr.io/zerocube/route53-record-updater:${{ github.GITHUB_SHA }}
-          ghcr.io/zerocube/route53-record-updater:latest
+          zerocube/route53-record-updater:${{ github.GITHUB_SHA }}
+          zerocube/route53-record-updater:latest
