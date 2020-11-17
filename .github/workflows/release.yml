@@ -8,7 +8,7 @@ on:
 name: Create Release
 
 jobs:
-  release:
+  build:
     name: Build the Artefacts
     runs-on: ubuntu-latest
     steps:
