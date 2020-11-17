@@ -38,9 +38,7 @@ func main() {
 		Type: aws.String("A"),
 		TTL:  recordTTL,
 		ResourceRecords: []*route53.ResourceRecord{
-			&route53.ResourceRecord{
-				Value: recordValue,
-			},
+			{Value: recordValue},
 		},
 	}
 
