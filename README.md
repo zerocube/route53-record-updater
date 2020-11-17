@@ -13,7 +13,7 @@ Best practice:
 Next-to-best practice:
 
 * Get the binary: `go get -v github.com/zerocube/route53-record-updater`
-* Create a wrapper script (see gorecord.sh) that exports the following environment variables:
+* Create a wrapper script (see `wrapper.sh`) that exports the following environment variables:
   * `HOSTED_ZONE_ID`
   * `RECORD_SET`
   * `RECORD_VALUE`
