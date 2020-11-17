@@ -15,7 +15,7 @@ import (
 (https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)
 */
 
-const version = "1.0.1"
+const version = "1.0.2"
 
 func main() {
 	// Build the session object
@@ -38,9 +38,7 @@ func main() {
 		Type: aws.String("A"),
 		TTL:  recordTTL,
 		ResourceRecords: []*route53.ResourceRecord{
-			&route53.ResourceRecord{
-				Value: recordValue,
-			},
+			{Value: recordValue},
 		},
 	}
 

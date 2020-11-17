@@ -22,7 +22,12 @@ function buildCommand() {
 
 rm -v build/${SCRIPT_NAME}* 2> /dev/null || true
 
+echo "Downloading dependencies"
+go mod download -x && go mod verify
+
 GOOS=linux    GOARCH=amd64  buildCommand "${@}"
+GOOS=linux    GOARCH=arm64  buildCommand "${@}"
+GOOS=linux    GOARCH=mips64 buildCommand "${@}"
 GOOS=darwin   GOARCH=amd64  buildCommand "${@}"
 GOOS=windows  GOARCH=amd64  buildCommand "${@}"
 

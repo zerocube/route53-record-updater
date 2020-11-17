@@ -1,7 +1,7 @@
 FROM golang:1.15
-WORKDIR /go/src/app
-RUN go-wrapper download github.com/aws/aws-sdk-go \
-  && go-wrapper install github.com/aws/aws-sdk-go
+WORKDIR /go/src/github.com/zerocube/route53-record-updater
+COPY go.mod go.sum ./
+RUN go mod download -x && go mod verify
 COPY . .
-RUN go build -v -x -o gorecord gorecord.go
-ENTRYPOINT "./gorecord"
+RUN go build -v -x -o route53-record-updater
+ENTRYPOINT "./route53-record-updater"
