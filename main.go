@@ -15,7 +15,7 @@ import (
 (https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)
 */
 
-const version = "1.0.3"
+const version = "1.0.4"
 
 func main() {
 	// Build the session object
@@ -29,7 +29,7 @@ func main() {
 	// Ensure that the hosted zone exists first
 	_, err = svc.GetHostedZone(&route53.GetHostedZoneInput{Id: hostedZoneID})
 	if err != nil {
-		log.Fatalln("Unable to find hosted zone with ID", *hostedZoneID)
+		log.Fatalln("Unable to find hosted zone with ID", *hostedZoneID, "-", err)
 	}
 
 	// Define the record that we're going to be UPSERTing
