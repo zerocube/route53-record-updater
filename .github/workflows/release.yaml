@@ -50,35 +50,6 @@ jobs:
           MATCHING_TAG="$(git tag --list | grep "^v${APP_VERSION}$" || true)"
           echo "MATCHING_TAG: ${MATCHING_TAG}"
           echo "matching_tag=${MATCHING_TAG}" >> "${GITHUB_OUTPUT}"
-  create_release:
-    name: Create GitHub Release
-    runs-on: ubuntu-latest
-    needs:
-      - get_metadata
-      - build
-    if: needs.get_metadata.outputs.matching_tag == ''
-    steps:
-      - name: Download compiled binaries
-        uses: actions/download-artifact@v4
-        with:
-          name: binaries
-          path: build/
-
-      - name: Create release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ needs.get_metadata.outputs.version_number }}
-          files: build/route53-record-updater_*
-          body: |
-            Release: Version ${{ needs.get_metadata.outputs.version_number }}
-
-            ${{ github.event.head_commit.message }}
-
-            Docker Image: ghcr.io/${{ github.repository }}:${{ needs.get_metadata.outputs.version_number }}
-            Github Package alternative: docker.pkg.github.com/${{github.repository}}/route53-record-updater:${{ needs.get_metadata.outputs.version_number }}
 
   build_push_docker:
     name: Build & Push
@@ -120,5 +91,34 @@ jobs:
     steps:
       - name: Push tag
         run: |
-          git tag "v${{ needs.get_metadata.outputs.version }}"
-          git push origin "v${{ needs.get_metadata.outputs.version }}"
+          git tag "v${{ needs.get_metadata.outputs.version_number }}"
+          git push origin "v${{ needs.get_metadata.outputs.version_number }}"
+
+  create_release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+      - push_tag
+      - get_metadata
+      - build_push_docker
+    steps:
+      - name: Download compiled binaries
+        uses: actions/download-artifact@v4
+        with:
+          name: binaries
+          path: build/
+
+      - name: Create release
+        id: create_release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ needs.get_metadata.outputs.version_number }}
+          files: build/route53-record-updater_*
+          body: |
+            Release: Version ${{ needs.get_metadata.outputs.version_number }}
+
+            ${{ github.event.head_commit.message }}
+
+            Docker Image: ghcr.io/${{ github.repository }}:${{ needs.get_metadata.outputs.version_number }}
