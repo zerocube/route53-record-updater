@@ -3,34 +3,32 @@ name: Go
 on:
   push:
     branches-ignore:
-      - 'main'
+      - "main"
 
 jobs:
-
   build_go:
     name: Test Build
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
+      - name: Set up Go 1.x
+        uses: actions/setup-go@v5
+        with:
+          go-version: ^1.24
+        id: go
 
-    - name: Set up Go 1.x
-      uses: actions/setup-go@v2
-      with:
-        go-version: ^1.15
-      id: go
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
 
-    - name: Check out code into the Go module directory
-      uses: actions/checkout@v2
+      - name: Build
+        run: auto/build
 
-    - name: Build
-      run: auto/build
+      - name: Test
+        run: |
+          build/route53-record-updater_linux_amd64 -version
+          go test -v .
 
-    - name: Test
-      run: |
-        build/route53-record-updater_linux_amd64 -version
-        go test -v .
-
-    - name: Upload build artefacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: binaries
-        path: build/route53-record-updater_*
+      - name: Upload build artefacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries
+          path: build/route53-record-updater_*
