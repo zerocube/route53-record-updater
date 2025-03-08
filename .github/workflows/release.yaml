@@ -92,7 +92,11 @@ jobs:
       - get_metadata
       - build_push_docker
     if: needs.get_metadata.outputs.matching_tag == ''
+    permissions:
+      contents: write
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
       - name: Push tag
         run: |
           git tag "v${{ needs.get_metadata.outputs.version_number }}"
