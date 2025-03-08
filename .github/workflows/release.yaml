@@ -2,14 +2,14 @@
 on:
   push:
     branches:
-      - 'main'
+      - "main"
 
 name: Main Release
 
 jobs:
   build:
     name: Build release artefacts
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Set up Go 1.x
         uses: actions/setup-go@v2
@@ -27,7 +27,7 @@ jobs:
           path: build/route53-record-updater_*
   get_metadata:
     name: Get app metadata
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs: []
     outputs:
       version_number: ${{ steps.get.outputs.version }}
@@ -52,7 +52,7 @@ jobs:
           echo ::set-output name=matching_tag::${MATCHING_TAG}
   create_release:
     name: Create GitHub Release
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs:
       - get_metadata
       - build
@@ -82,7 +82,7 @@ jobs:
 
   build_push_docker:
     name: Build & Push
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs:
       - get_metadata
     if: needs.get_metadata.outputs.matching_tag == ''
@@ -112,7 +112,7 @@ jobs:
 
   build_push_docker_legacy: # GitHub Packages is going away soon-ish.
     name: Build & Push (legacy)
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     needs:
       - get_metadata
     if: needs.get_metadata.outputs.matching_tag == ''
