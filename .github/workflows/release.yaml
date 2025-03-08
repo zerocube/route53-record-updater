@@ -44,12 +44,12 @@ jobs:
         name: Get version from command line
         run: |
           APP_VERSION="$(go run . --version)"
-          echo ::set-output name=version::${APP_VERSION}
+          echo "version=${APP_VERSION}" >> "${GITHUB_OUTPUT}"
           echo "APP_VERSION: ${APP_VERSION}"
           git fetch --tags
           MATCHING_TAG="$(git tag --list | grep "^v${APP_VERSION}$" || true)"
           echo "MATCHING_TAG: ${MATCHING_TAG}"
-          echo ::set-output name=matching_tag::${MATCHING_TAG}
+          echo "matching_tag=${MATCHING_TAG}" >> "${GITHUB_OUTPUT}"
   create_release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
@@ -109,3 +109,16 @@ jobs:
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.sha }}
             ghcr.io/${{ github.repository }}:${{ needs.get_metadata.outputs.version_number }}
+
+  push_tag:
+    name: Push tag
+    runs-on: ubuntu-latest
+    needs:
+      - get_metadata
+      - build_push_docker
+    if: needs.get_metadata.outputs.matching_tag == ''
+    steps:
+      - name: Push tag
+        run: |
+          git tag "v${{ needs.get_metadata.outputs.version }}"
+          git push origin "v${{ needs.get_metadata.outputs.version }}"
