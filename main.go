@@ -15,7 +15,7 @@ import (
 (https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html)
 */
 
-const version = "1.0.5"
+const version = "1.0.6"
 
 func main() {
 	// Build the session object
