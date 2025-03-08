@@ -54,6 +54,9 @@ jobs:
   build_push_docker:
     name: Build & Push
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     needs:
       - get_metadata
     if: needs.get_metadata.outputs.matching_tag == ''
