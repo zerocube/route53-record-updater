@@ -21,7 +21,7 @@ jobs:
       - name: Build project
         run: auto/build
       - name: Upload build artefacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: binaries
           path: build/route53-record-updater_*
@@ -59,7 +59,7 @@ jobs:
     if: needs.get_metadata.outputs.matching_tag == ''
     steps:
       - name: Download compiled binaries
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: binaries
           path: build/
