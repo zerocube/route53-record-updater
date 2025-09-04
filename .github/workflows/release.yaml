@@ -17,7 +17,7 @@ jobs:
           go-version: ^1.24
         id: go
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Build project
         run: auto/build
       - name: Upload build artefacts
@@ -39,7 +39,7 @@ jobs:
           go-version: ^1.24
         id: go
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - id: get
         name: Get version from command line
         run: |
@@ -61,7 +61,7 @@ jobs:
       - get_metadata
     if: needs.get_metadata.outputs.matching_tag == ''
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -96,7 +96,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Push tag
         run: |
           git tag "v${{ needs.get_metadata.outputs.version_number }}"
