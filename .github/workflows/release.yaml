@@ -112,7 +112,7 @@ jobs:
       - push_tag
     steps:
       - name: Download compiled binaries
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: binaries
           path: build/
