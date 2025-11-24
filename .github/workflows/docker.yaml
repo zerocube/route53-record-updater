@@ -20,7 +20,7 @@ jobs:
         ports:
           - 5000:5000
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
