@@ -1,4 +1,4 @@
-FROM golang:1.25
+FROM golang:1.26
 WORKDIR /go/src/github.com/zerocube/route53-record-updater
 COPY go.mod go.sum ./
 RUN go mod download -x && go mod verify
